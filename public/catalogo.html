@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo de Productos y Servicios</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .product-card {
+      transition: transform 0.3s;
+    }
+    .product-card:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-5">
+    <h1 class="text-center mb-5">Catálogo de Productos y Servicios</h1>
+    <div class="input-group mb-3">
+      <input type="text" class="form-control" placeholder="Buscar Producto" id="searchInput">
+      <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button" id="searchBtn">Buscar</button>
+      </div>
+    </div>
+    <div class="row" id="product-list">
+      <!-- Aquí se renderizarán los productos -->
+    </div>
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#productModal">
+      Agregar Producto
+    </button>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="productModalLabel">Agregar Producto</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="product-form">
+            <div class="form-group">
+              <label for="productImage">Imagen del Producto</label>
+              <input type="file" class="form-control-file" id="productImage">
+            </div>
+            <div class="form-group">
+              <label for="productName">Nombre del Producto</label>
+              <input type="text" class="form-control" id="productName">
+            </div>
+            <div class="form-group">
+              <label for="productDetails">Características del Producto</label>
+              <textarea class="form-control" id="productDetails" rows="3"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" id="save-product">Guardar Cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmación de Eliminación -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">¿Estás seguro de querer eliminar este producto?</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmDelete">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    const productList = document.getElementById('product-list');
+    const productForm = document.getElementById('product-form');
+    const saveProductBtn = document.getElementById('save-product');
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const confirmDeleteBtn = document.getElementById('confirmDelete');
+
+    let products = [];
+    let editingIndex = null;
+    let deleteIndex = null;
+
+    function renderProducts(filteredProducts = products) {
+      productList.innerHTML = '';
+      filteredProducts.forEach((product, index) => {
+        const productCard = `
+          <div class="col-md-4 mb-4">
+            <div class="card product-card">
+              <img src="${product.image || 'https://via.placeholder.com/300x200'}" class="card-img-top" alt="${product.name}">
+              <div class="card-body">
+                <h5 class="card-title">${product.name}</h5>
+                <p class="card-text">${product.details}</p>
+                <div class="d-flex justify-content-between">
+                  <button class="btn btn-primary edit-product" data-index="${index}">Editar</button>
+                  <button class="btn btn-danger delete-product" data-index="${index}">Eliminar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        productList.innerHTML += productCard;
+      });
+    }
+
+    saveProductBtn.addEventListener('click', () => {
+      const productImage = document.getElementById('productImage').files[0];
+      const productName = document.getElementById('productName').value;
+      const productDetails = document.getElementById('productDetails').value;
+
+      if (editingIndex !== null) {
+        // Actualizar el producto existente
+        products[editingIndex] = {
+          image: productImage ? URL.createObjectURL(productImage) : products[editingIndex].image,
+          name: productName,
+          details: productDetails
+        };
+        editingIndex = null; // Restablecer el índice de edición
+      } else {
+        // Agregar un nuevo producto
+        const newProduct = {
+          image: productImage ? URL.createObjectURL(productImage) : null,
+          name: productName,
+          details: productDetails
+        };
+        products.push(newProduct);
+      }
+
+      renderProducts();
+
+      // Limpiar el formulario
+      productForm.reset();
+
+      // Cerrar el modal
+      $('#productModal').modal('hide');
+    });
+
+    productList.addEventListener('click', (event) => {
+      if (event.target.classList.contains('delete-product')) {
+        const index = event.target.dataset.index;
+        deleteIndex = index;
+        $('#deleteModal').modal('show');
+      } else if (event.target.classList.contains('edit-product')) {
+        const index = event.target.dataset.index;
+        const product = products[index];
+        document.getElementById('productImage').value = '';
+        document.getElementById('productName').value = product.name;
+        document.getElementById('productDetails').value = product.details;
+        editingIndex = index;
+        $('#productModal').modal('show');
+      }
+    });
+
+    confirmDeleteBtn.addEventListener('click', () => {
+      products.splice(deleteIndex, 1);
+      renderProducts();
+      $('#deleteModal').modal('hide');
+    });
+
+    searchBtn.addEventListener('click', () => {
+      const searchTerm = searchInput.value.toLowerCase();
+      const filteredProducts = products.filter(product =>
+        product.name.toLowerCase().includes(searchTerm)
+      );
+      renderProducts(filteredProducts);
+    });
+  </script>
+</body>
+</html>

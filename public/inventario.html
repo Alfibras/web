@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Materiales</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-4">Materiales</h1>
+    <div class="input-group mb-3">
+      <input type="text" class="form-control" placeholder="Buscar materiales" aria-label="Buscar materiales" id="searchInput" onkeyup="filterTable()">
+    </div>
+
+    <table class="table table-striped" id="materialesTable">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Cantidad</th>
+          <th>Unidad</th>
+          <th>Precio por unidad</th>
+          <th>Nivel de reserva</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="inventarioBody">
+        <!-- Los datos del inventario se agregarán aquí -->
+      </tbody>
+    </table>
+
+    <!-- Botón para abrir el modal de nuevo material -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#nuevoMaterialModal">
+      Nuevo material
+    </button>
+
+    <!-- Modal para nuevo material -->
+    <div class="modal fade" id="nuevoMaterialModal" tabindex="-1" aria-labelledby="nuevoMaterialModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="nuevoMaterialModalLabel">Nuevo material</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="form-group">
+                <label for="nombreMaterial">Nombre del material</label>
+                <input type="text" class="form-control" id="nombreMaterial" placeholder="Ingrese el nombre del material">
+              </div>
+              <div class="form-group">
+                <label for="cantidad">Cantidad</label>
+                <input type="number" class="form-control" id="cantidad" placeholder="Ingrese la cantidad">
+              </div>
+              <div class="form-group">
+                <label for="unidad">Unidad</label>
+                <input type="text" class="form-control" id="unidad" placeholder="Ingrese la unidad">
+              </div>
+              <div class="form-group">
+                <label for="precioUnidad">Precio por unidad</label>
+                <input type="number" class="form-control" id="precioUnidad" placeholder="Ingrese el precio por unidad">
+              </div>
+              <div class="form-group">
+                <label for="nivelReorden">Nivel de reorden</label>
+                <input type="number" class="form-control" id="nivelReorden" placeholder="Ingrese el nivel de reorden">
+              </div>
+              <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="estado">
+                <label class="form-check-label" for="estado">Estado</label>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="guardarMaterial">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para editar material -->
+    <div class="modal fade" id="editarMaterialModal" tabindex="-1" aria-labelledby="editarMaterialModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editarMaterialModalLabel">Editar material</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="form-group">
+                <label for="nombreMaterialEditar">Nombre del material</label>
+                <input type="text" class="form-control" id="nombreMaterialEditar" placeholder="Ingrese el nombre del material">
+              </div>
+              <div class="form-group">
+                <label for="cantidadEditar">Cantidad</label>
+                <input type="number" class="form-control" id="cantidadEditar" placeholder="Ingrese la cantidad">
+              </div>
+              <div class="form-group">
+                <label for="unidadEditar">Unidad</label>
+                <input type="text" class="form-control" id="unidadEditar" placeholder="Ingrese la unidad">
+              </div>
+              <div class="form-group">
+                <label for="precioUnidadEditar">Precio por unidad</label>
+                <input type="number" class="form-control" id="precioUnidadEditar" placeholder="Ingrese el precio por unidad">
+              </div>
+              <div class="form-group">
+                <label for="nivelReordenEditar">Nivel de reorden</label>
+                <input type="number" class="form-control" id="nivelReordenEditar" placeholder="Ingrese el nivel de reorden">
+              </div>
+              <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="estadoEditar">
+                <label class="form-check-label" for="estadoEditar">Estado</label>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="guardarCambios">Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <!-- ... -->
+    </div>
+    <div class="text-right">
+      <button type="button" class="btn btn-primary mr-2" id="guardarCambiosGlobales">Guardar cambios</button>
+      <button type="button" class="btn btn-secondary">Cancelar</button>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      var materials = [];
+
+      $("#guardarMaterial").click(function() {
+        var nombre = $("#nombreMaterial").val();
+        var cantidad = $("#cantidad").val();
+        var unidad = $("#unidad").val();
+        var precioUnidad = $("#precioUnidad").val();
+        var nivelReorden = $("#nivelReorden").val();
+        var estado = $("#estado").prop("checked");
+
+        var material = {
+          nombre: nombre,
+          cantidad: cantidad,
+          unidad: unidad,
+          precioUnidad: precioUnidad,
+          nivelReorden: nivelReorden,
+          estado: estado
+        };
+
+        materials.push(material);
+        renderTable();
+        $("#nuevoMaterialModal").modal("hide");
+      });
+
+      $("#inventarioBody").on("click", ".btn-danger", function() {
+        var index = $(this).data("index");
+        materials.splice(index, 1);
+        renderTable();
+      });
+
+      $("#inventarioBody").on("click", ".btn-primary", function() {
+        var index = $(this).data("index");
+        var material = materials[index];
+        $("#nombreMaterialEditar").val(material.nombre);
+        $("#cantidadEditar").val(material.cantidad);
+        $("#unidadEditar").val(material.unidad);
+        $("#precioUnidadEditar").val(material.precioUnidad);
+        $("#nivelReordenEditar").val(material.nivelReorden);
+        $("#estadoEditar").prop("checked", material.estado);
+        $("#editarMaterialModal").modal("show");
+        $("#editarMaterialModal").data("index", index);
+      });
+
+      $("#guardarCambios").click(function() {
+        var index = $("#editarMaterialModal").data("index");
+        var nombre = $("#nombreMaterialEditar").val();
+        var cantidad = $("#cantidadEditar").val();
+        var unidad = $("#unidadEditar").val();
+        var precioUnidad = $("#precioUnidadEditar").val();
+        var nivelReorden = $("#nivelReordenEditar").val();
+        var estado = $("#estadoEditar").prop("checked");
+
+        materials[index] = {
+          nombre: nombre,
+          cantidad: cantidad,
+          unidad: unidad,
+          precioUnidad: precioUnidad,
+          nivelReorden: nivelReorden,
+          estado: estado
+        };
+
+        renderTable();
+        $("#editarMaterialModal").modal("hide");
+      });
+
+      $("#guardarCambiosGlobales").click(function() {
+        // Aquí puedes implementar la lógica para guardar los cambios globales
+        console.log("Guardando cambios globales...");
+      });
+
+      function renderTable() {
+        $("#inventarioBody").empty();
+        materials.forEach(function(material, index) {
+          var fila = `
+            <tr>
+              <td>${material.nombre}</td>
+              <td>${material.cantidad}</td>
+              <td>${material.unidad}</td>
+              <td>$${material.precioUnidad}</td>
+              <td>${material.nivelReorden}</td>
+              <td><input type="checkbox" ${material.estado ? "checked" : ""}></td>
+              <td>
+                <button type="button" class="btn btn-primary btn-sm" data-index="${index}" data-toggle="modal" data-target="#editarMaterialModal">
+                  Editar
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" data-index="${index}">
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          `;
+          $("#inventarioBody").append(fila);
+        });
+      }
+
+      function filterTable() {
+        var searchValue = $('#searchInput').val().toLowerCase();
+        $('#materialesTable tbody tr').filter(function() {
+          $(this).toggle($(this).find('td:first').text().toLowerCase().indexOf(searchValue) > -1)
+        });
+      }
+    });
+  </script>
+</body>
+</html>
